@@ -9,17 +9,46 @@ import (
 	_ "github.com/lib/pq"
 )
 
-func ConnectToDb() {
+var DB *sql.DB
+
+func ConnectToDb() error {
 	connStr := os.Getenv("CONNECTION_STRING")
-	fmt.Println(connStr)
 	db, err := sql.Open("postgres", connStr)
 
 	if err != nil {
 		log.Fatal("err connecting db...", err)
 	}
 
-	defer db.Close()
+	err = db.Ping()
 
-	fmt.Println("Server running")
+	if err != nil {
+		log.Fatal("Failed to open DB connection")
+	}
+
+	fmt.Println("successfully connected to DB")
+
+	DB = db
+
+	return nil
+}
+
+func CreateUrlsTable() {
+	query := `
+		CREATE TABLE IF NOT EXISTS urls (
+			id SERIAL PRIMARY KEY,
+			short_code VARCHAR(10) UNIQUE NOT NULL,
+			original_url TEXT NOT NULL,
+			created_at TIMESTAMP  DEFAULT NOW()
+		)
+	`
+
+	_, err := DB.Query(query)
+
+	if err != nil {
+		fmt.Println("error creating urls table", err)
+		return
+	}
+
+	fmt.Println("Created ")
 
 }

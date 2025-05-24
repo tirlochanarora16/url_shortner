@@ -19,5 +19,11 @@ func initiateStartup() {
 		log.Fatal("Error fetching env variables", err)
 	}
 
-	database.ConnectToDb()
+	err = database.ConnectToDb()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	database.CreateUrlsTable()
 }

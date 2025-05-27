@@ -3,15 +3,13 @@ package main
 import (
 	"log"
 
+	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"github.com/tirlochanarora16/url_shortner/database"
+	"github.com/tirlochanarora16/url_shortner/routes"
 )
 
 func main() {
-	initiateStartup()
-}
-
-func initiateStartup() {
 	err := godotenv.Load()
 
 	if err != nil {
@@ -25,4 +23,8 @@ func initiateStartup() {
 	}
 
 	database.CreateUrlsTable()
+
+	server := gin.Default()
+	routes.RegisterRoutes(server)
+	server.Run(":3000")
 }

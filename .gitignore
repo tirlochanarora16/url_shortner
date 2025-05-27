@@ -32,4 +32,5 @@ vendor/
 
 # development tools
 .air.toml
+tmp/
 

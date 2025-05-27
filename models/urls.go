@@ -8,10 +8,10 @@ import (
 )
 
 type Urls struct {
-	ID          string
-	ShortCode   string
-	OriginalUrl string
-	DateTime    time.Time
+	ID          string    `json:"id"`
+	ShortCode   string    `json:"short_code"`
+	OriginalUrl string    `json:"original_url"`
+	DateTime    time.Time `json:"dateTime"`
 }
 
 func CheckUrlExists(originalUrl string) (*Urls, error) {

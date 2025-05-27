@@ -17,12 +17,14 @@ func ConnectToDb() error {
 
 	if err != nil {
 		log.Fatal("err connecting db...", err)
+		return err
 	}
 
 	err = db.Ping()
 
 	if err != nil {
 		log.Fatal("Failed to open DB connection")
+		return err
 	}
 
 	fmt.Println("successfully connected to DB")
@@ -49,6 +51,6 @@ func CreateUrlsTable() {
 		return
 	}
 
-	fmt.Println("Created ")
+	fmt.Println("Created Users table")
 
 }

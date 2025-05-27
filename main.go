@@ -4,7 +4,6 @@ import (
 	"log"
 
 	"github.com/joho/godotenv"
-	_ "github.com/lib/pq"
 	"github.com/tirlochanarora16/url_shortner/database"
 )
 

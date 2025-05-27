@@ -30,3 +30,6 @@ vendor/
 .env
 .env.*
 
+# development tools
+.air.toml
+

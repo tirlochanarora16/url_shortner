@@ -37,7 +37,7 @@ func ConnectToDb() error {
 func CreateUrlsTable() {
 	query := `
 		CREATE TABLE IF NOT EXISTS urls (
-			id SERIAL PRIMARY KEY,
+			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
 			short_code VARCHAR(10) UNIQUE NOT NULL,
 			original_url TEXT NOT NULL,
 			created_at TIMESTAMP  DEFAULT NOW()

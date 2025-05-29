@@ -14,6 +14,10 @@ type Urls struct {
 	DateTime    time.Time `json:"dateTime"`
 }
 
+type NewShortUrlBody struct {
+	OriginalUrl string `json:"original_url" binding:"required"`
+}
+
 func CheckUrlExists(originalUrl string) (*Urls, error) {
 	query := "SELECT *  FROM urls WHERE original_url = $1"
 
@@ -30,4 +34,13 @@ func CheckUrlExists(originalUrl string) (*Urls, error) {
 	}
 
 	return &selectedRow, nil
+}
+
+func (u *Urls) Save() error {
+	query := `
+		INSERT INTO urls(short_code, original_url) VALUES ($1, $2)
+	`
+	_, err := database.DB.Query(query, u.ShortCode, u.OriginalUrl)
+
+	return err
 }

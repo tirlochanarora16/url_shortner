@@ -36,11 +36,27 @@ func CheckUrlExists(originalUrl string) (*Urls, error) {
 	return &selectedRow, nil
 }
 
-func (u *Urls) Save() error {
+func (u *Urls) Save() (*Urls, error) {
 	query := `
 		INSERT INTO urls(short_code, original_url) VALUES ($1, $2)
+		RETURNING id, short_code, original_url, created_at
 	`
-	_, err := database.DB.Query(query, u.ShortCode, u.OriginalUrl)
+	rows, err := database.DB.Query(query, u.ShortCode, u.OriginalUrl)
 
-	return err
+	if err != nil {
+		return &Urls{}, err
+	}
+
+	defer rows.Close()
+
+	if rows.Next() {
+		err = rows.Scan(&u.ID, &u.ShortCode, &u.OriginalUrl, &u.DateTime)
+	}
+
+	if err != nil {
+		return &Urls{}, err
+	}
+
+	// return the newly created row
+	return u, nil
 }

@@ -49,7 +49,7 @@ func createShortUrl(c *gin.Context) {
 
 	newShortUrl.OriginalUrl = body.OriginalUrl
 	newShortUrl.ShortCode = shortCode
-	err = newShortUrl.Save()
+	res, err := newShortUrl.Save()
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -60,5 +60,5 @@ func createShortUrl(c *gin.Context) {
 	}
 
 	// create New record in the DB
-	c.JSON(http.StatusCreated, gin.H{"response": newShortUrl})
+	c.JSON(http.StatusCreated, gin.H{"response": res})
 }

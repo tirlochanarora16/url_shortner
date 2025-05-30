@@ -36,6 +36,20 @@ func CheckUrlExists(originalUrl string) (*Urls, error) {
 	return &selectedRow, nil
 }
 
+func CheckShortCode(shortCode string) (*Urls, error) {
+	query := "SELECT *  FROM urls WHERE short_code = $1"
+
+	row := database.DB.QueryRow(query, shortCode)
+
+	var selectedRow Urls
+	err := row.Scan(&selectedRow.ID, &selectedRow.ShortCode, &selectedRow.OriginalUrl, &selectedRow.DateTime)
+
+	if err != nil {
+		return &Urls{}, err
+	}
+
+	return &selectedRow, nil
+}
 func (u *Urls) Save() (*Urls, error) {
 	query := `
 		INSERT INTO urls(short_code, original_url) VALUES ($1, $2)

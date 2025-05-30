@@ -62,3 +62,18 @@ func createShortUrl(c *gin.Context) {
 	// create New record in the DB
 	c.JSON(http.StatusCreated, gin.H{"response": res})
 }
+
+func catchAllRoutes(c *gin.Context) {
+	shortCode := c.Param("shortCode")
+	url, err := models.CheckShortCode(shortCode[1:])
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "Invalid url",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	c.Redirect(http.StatusFound, url.OriginalUrl)
+}

@@ -23,6 +23,7 @@ func main() {
 	}
 
 	database.CreateUrlsTable()
+	database.RunMigrations()
 
 	server := gin.Default()
 	routes.RegisterRoutes(server)

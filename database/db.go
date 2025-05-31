@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	_ "github.com/lib/pq"
 )
@@ -78,19 +79,28 @@ func AlterTable(query, msg string) error {
 
 func RunMigrations() {
 	for _, item := range migrations {
-		table, columnName := item["table"], item["columnName"]
-		res, err := checkColumnExistsInTable(table, columnName)
+		table, columnName, query := item["table"], item["columnName"], item["query"]
+
+		table = strings.TrimSpace(table)
+		columnName = strings.TrimSpace(columnName)
+
+		if table == "" || columnName == "" {
+			fmt.Println("Table name or Column Name cannot be empty!")
+			continue
+		}
+
+		columnExist, err := checkColumnExistsInTable(table, columnName)
 
 		if err != nil {
 			fmt.Println("error in checking the column", err)
 			continue
 		}
 
-		if res {
+		if columnExist {
 			fmt.Println("Column already exists in the given table...Skipping the migration")
 			continue
 		} else {
-			err = AlterTable(item["query"], fmt.Sprintf("Updated table %s for column %s", table, columnName))
+			err = AlterTable(query, fmt.Sprintf("Updated table %s for column %s", table, columnName))
 
 			if err != nil {
 				fmt.Println(fmt.Sprintf("Error updating table %s for column %s - %s", table, columnName, err.Error()))

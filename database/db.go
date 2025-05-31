@@ -52,17 +52,7 @@ func ConnectToDb() error {
 	return nil
 }
 
-func CreateUrlsTable() {
-	query := `
-		CREATE TABLE IF NOT EXISTS urls (
-			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-			short_code VARCHAR(10) UNIQUE NOT NULL,
-			original_url TEXT NOT NULL,
-			created_at TIMESTAMP  DEFAULT NOW(),
-			updated_at TIMESTAMP  DEFAULT NOW()
-		)
-	`
-
+func CreateTable(query, tableName string) {
 	_, err := DB.Query(query)
 
 	if err != nil {
@@ -70,7 +60,7 @@ func CreateUrlsTable() {
 		return
 	}
 
-	fmt.Println("Created Users table")
+	fmt.Println("Created table --- ", tableName)
 
 }
 

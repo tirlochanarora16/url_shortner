@@ -22,7 +22,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	database.CreateUrlsTable()
+	database.CreateTable(database.CreateUrlTable, "users")
+	database.CreateTable(database.CreateSchemaMigrationTable, "schema")
 	database.RunMigrations()
 
 	server := gin.Default()

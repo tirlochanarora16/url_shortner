@@ -16,6 +16,22 @@ var migrations = []Migrations{
 	},
 }
 
+func (m *Migrations) CheckMigrationApplied() (bool, error) {
+	var exists bool
+	query := `
+		SELECT EXISTS (
+			SELECT 1 FROM schema_migrations WHERE name = $1
+		)
+	`
+	err := DB.QueryRow(query, m.MigrationName).Scan(&exists)
+
+	if err != nil {
+		return false, err
+	}
+
+	return exists, err
+}
+
 func (m *Migrations) AddMigrationToDB() error {
 	query := `
 		INSERT INTO schema_migrations(name) VALUES ($1)

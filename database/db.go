@@ -30,22 +30,6 @@ func checkColumnExistsInTable(table, columnName string) (bool, error) {
 	return columnExists, nil
 }
 
-func checkMigrationApplied(migrationName string) (bool, error) {
-	var exists bool
-	query := `
-		SELECT EXISTS (
-			SELECT 1 FROM schema_migrations WHERE name = $1
-		)
-	`
-	err := DB.QueryRow(query, migrationName).Scan(&exists)
-
-	if err != nil {
-		return false, err
-	}
-
-	return exists, err
-}
-
 func ConnectToDb() error {
 	connStr := os.Getenv("CONNECTION_STRING")
 	db, err := sql.Open("postgres", connStr)
@@ -112,7 +96,7 @@ func RunMigrations() {
 			continue
 		}
 
-		migrationApplied, err := checkMigrationApplied(migrationName)
+		migrationApplied, err := migration.CheckMigrationApplied()
 
 		if err != nil {
 			fmt.Println("error checking the migration --- ", migrationName)

@@ -30,6 +30,22 @@ func checkColumnExistsInTable(table, columnName string) (bool, error) {
 	return columnExists, nil
 }
 
+func checkMigrationApplied(migrationName string) (bool, error) {
+	var exists bool
+	query := `
+		SELECT EXISTS (
+			SELECT 1 FROM schema_migrations WHERE name = $1
+		)
+	`
+	err := DB.QueryRow(query, migrationName).Scan(&exists)
+
+	if err != nil {
+		return false, err
+	}
+
+	return exists, err
+}
+
 func ConnectToDb() error {
 	connStr := os.Getenv("CONNECTION_STRING")
 	db, err := sql.Open("postgres", connStr)
@@ -73,13 +89,13 @@ func AlterTable(query, msg string) error {
 		return err
 	}
 
-	fmt.Println("Sucess Message - ", msg)
+	fmt.Println("Sucess Message --- ", msg)
 	return nil
 }
 
 func RunMigrations() {
-	for _, item := range migrations {
-		table, columnName, query := item["table"], item["columnName"], item["query"]
+	for _, migration := range migrations {
+		table, columnName, migrationName := migration.Table, migration.ColumnName, migration.MigrationName
 
 		table = strings.TrimSpace(table)
 		columnName = strings.TrimSpace(columnName)
@@ -89,25 +105,32 @@ func RunMigrations() {
 			continue
 		}
 
-		columnExist, err := checkColumnExistsInTable(table, columnName)
+		_, err := checkColumnExistsInTable(table, columnName)
 
 		if err != nil {
 			fmt.Println("error in checking the column", err)
 			continue
 		}
 
-		if columnExist {
-			fmt.Println("Column already exists in the given table...Skipping the migration")
+		migrationApplied, err := checkMigrationApplied(migrationName)
+
+		if err != nil {
+			fmt.Println("error checking the migration --- ", migrationName)
+			continue
+		}
+
+		if migrationApplied {
+			fmt.Println("Migration already applied...Skipping the migration ---", migrationName)
 			continue
 		} else {
-			err = AlterTable(query, fmt.Sprintf("Updated table %s for column %s", table, columnName))
+			err := migration.ApplyMigration()
 
 			if err != nil {
-				fmt.Println(fmt.Sprintf("Error updating table %s for column %s - %s", table, columnName, err.Error()))
+				fmt.Println(fmt.Errorf("Error in applying the migration '%s' on the Table '%s'", migrationName, table))
 				continue
 			}
 		}
 	}
 
-	fmt.Println("Migrations complete...")
+	fmt.Println("Migrations complete... 😀")
 }

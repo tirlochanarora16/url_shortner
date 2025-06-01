@@ -1,9 +1,48 @@
 package database
 
-var migrations = []map[string]string{
+type Migrations struct {
+	Table         string
+	ColumnName    string
+	MigrationName string // the name of the migration should be unique
+	Quey          string
+}
+
+var migrations = []Migrations{
 	{
-		"table":      "urls",
-		"columnName": "updated_at",
-		"query":      AlterUrlTableUpdateAt,
+		Table:         "urls",
+		ColumnName:    "updated_at",
+		Quey:          AlterUrlTableUpdateAt,
+		MigrationName: "add_updated_at_1_06_25",
 	},
+}
+
+func (m *Migrations) AddMigrationToDB() error {
+	query := `
+		INSERT INTO schema_migrations(name) VALUES ($1)
+	`
+	_, err := DB.Query(query, m.MigrationName)
+
+	return err
+}
+
+func (m *Migrations) ApplyMigration() error {
+	tx, err := DB.Begin()
+
+	if err != nil {
+		return err
+	}
+
+	// actual migration query
+	if _, err := tx.Exec(m.Quey); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// adding the name of the migration to the schema_migrations DB
+	if err := m.AddMigrationToDB(); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit()
 }

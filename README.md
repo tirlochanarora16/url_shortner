@@ -8,6 +8,7 @@ A simple URL shortener service built with Go, Gin, and PostgreSQL. This service 
 - Store and retrieve URL mappings in a PostgreSQL database
 - Redirect short URLs to their original URLs
 - RESTful API endpoints
+- **Basic SQL migration tool for schema changes**
 
 ## Project Structure
 
@@ -16,13 +17,38 @@ url_shortner/
 ├── main.go                # Application entry point
 ├── go.mod                 # Go module definition and dependencies
 ├── database/
-│   └── db.go              # Database connection and table creation
+│   ├── db.go              # Database connection and table creation
+│   └── migrations.go      # Basic SQL migration tool
 ├── models/
 │   └── urls.go            # URL model and database operations
 ├── routes/
 │   ├── routes.go          # Route registration
 │   └── urls.go            # Route handlers (shorten, redirect)
 ```
+
+## SQL Migration Tool
+
+This project includes a **basic SQL migration tool** implemented in `database/migrations.go`. It allows you to:
+
+- Define migrations as Go structs with a unique name and SQL query
+- Apply schema changes (such as adding columns) in a transactional way
+- Track applied migrations in a `schema_migrations` table to prevent duplicate execution
+
+**Example migration struct:**
+
+```go
+Migrations{
+    Table:         "urls",
+    ColumnName:    "updated_at",
+    Quey:          AlterUrlTableUpdateAt, // SQL query string
+    MigrationName: "add_updated_at_1_06_25",
+}
+```
+
+**Key methods:**
+
+- `ApplyMigration()`: Runs the migration SQL and records it in the database
+- `AddMigrationToDB()`: Adds the migration name to the `schema_migrations` table
 
 ## API Endpoints
 

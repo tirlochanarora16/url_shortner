@@ -4,14 +4,14 @@ type Migrations struct {
 	Table         string
 	ColumnName    string
 	MigrationName string // the name of the migration should be unique
-	Quey          string
+	Query         string
 }
 
 var migrations = []Migrations{
 	{
 		Table:         "urls",
 		ColumnName:    "updated_at",
-		Quey:          AlterUrlTableUpdateAt,
+		Query:         AlterUrlTableUpdateAt,
 		MigrationName: "add_updated_at_1_06_25",
 	},
 }
@@ -49,7 +49,7 @@ func (m *Migrations) ApplyMigration() error {
 	}
 
 	// actual migration query
-	if _, err := tx.Exec(m.Quey); err != nil {
+	if _, err := tx.Exec(m.Query); err != nil {
 		tx.Rollback()
 		return err
 	}

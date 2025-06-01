@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -24,7 +25,9 @@ func main() {
 
 	database.CreateTable(database.CreateUrlTable, "users")
 	database.CreateTable(database.CreateSchemaMigrationTable, "schema")
-	database.RunMigrations()
+	if os.Getenv("APPLY_MIGRATION") == "true" {
+		database.RunMigrations()
+	}
 
 	server := gin.Default()
 	routes.RegisterRoutes(server)

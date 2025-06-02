@@ -96,7 +96,7 @@ func RunMigrations() {
 			continue
 		}
 
-		migrationApplied, err := migration.CheckMigrationApplied()
+		migrationApplied, err := migration.Check()
 
 		if err != nil {
 			fmt.Println("error checking the migration --- ", migrationName)
@@ -107,7 +107,7 @@ func RunMigrations() {
 			fmt.Println("Migration already applied...Skipping the migration ---", migrationName)
 			continue
 		} else {
-			err := migration.ApplyMigration()
+			err := migration.Apply()
 
 			if err != nil {
 				fmt.Println(fmt.Errorf("Error in applying the migration '%s' on the Table '%s'", migrationName, table))

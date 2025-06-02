@@ -16,7 +16,7 @@ var migrations = []Migrations{
 	},
 }
 
-func (m *Migrations) CheckMigrationApplied() (bool, error) {
+func (m *Migrations) Check() (bool, error) {
 	var exists bool
 	query := `
 		SELECT EXISTS (
@@ -41,7 +41,7 @@ func (m *Migrations) AddMigrationToDB() error {
 	return err
 }
 
-func (m *Migrations) ApplyMigration() error {
+func (m *Migrations) Apply() error {
 	tx, err := DB.Begin()
 
 	if err != nil {

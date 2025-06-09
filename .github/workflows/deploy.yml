@@ -29,6 +29,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           source: "main"
           target: "/home/ec2-user/"
+          debug: true
 
       - name: Restart app via SSH
         uses: appleboy/ssh-action@v1.0.0

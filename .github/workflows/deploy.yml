@@ -21,6 +21,13 @@ jobs:
         run: |
           GOOS=linux GOARCH=amd64 go build -o main .
 
+      - name: Check SSH key format
+        run: |
+          echo "${{ secrets.EC2_SSH_KEY }}" > id_rsa
+          chmod 600 id_rsa
+          head -5 id_rsa
+        shell: bash
+
       - name: Upload via SCP
         uses: appleboy/scp-action@v0.1.6
         with:

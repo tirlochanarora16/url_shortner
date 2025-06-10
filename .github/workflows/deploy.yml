@@ -45,11 +45,15 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+
             # ✅ Create .env file
             echo "CONNECTION_STRING='${{ secrets.CONNECTION_STRING }}'" > /home/ec2-user/.env
 
             # ✅ Kill old process if any
             pkill main || true
+
+            # export connection String
+            export CONNECTION_STRING="${{ secrets.CONNECTION_STRING }}"
 
             # ✅ Start app with .env loaded
             nohup env $(cat /home/ec2-user/.env | xargs) ./main > app.log 2>&1 &

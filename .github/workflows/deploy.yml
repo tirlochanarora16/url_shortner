@@ -2,7 +2,7 @@ name: Deploy to EC2
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   build-and-deploy:
@@ -15,7 +15,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: '1.21'
+          go-version: "1.21"
 
       - name: Build binary
         run: |
@@ -45,5 +45,11 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            # ✅ Create .env file
+            echo "CONNECTION_STRING='${{ secrets.CONNECTION_STRING }}'" > /home/ec2-user/.env
+
+            # ✅ Kill old process if any
             pkill main || true
-            nohup ./main > app.log 2>&1 &
+
+            # ✅ Start app with .env loaded
+            nohup env $(cat /home/ec2-user/.env | xargs) ./main > app.log 2>&1 &

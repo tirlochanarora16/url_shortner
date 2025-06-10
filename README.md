@@ -9,6 +9,7 @@ A simple URL shortener service built with Go, Gin, and PostgreSQL. This service 
 - Redirect short URLs to their original URLs
 - RESTful API endpoints
 - **Basic SQL migration tool for schema changes**
+- **Automated CI/CD pipeline with GitHub Actions, AWS EC2, and RDS PostgreSQL**
 
 ## Project Structure
 
@@ -18,12 +19,15 @@ url_shortner/
 ├── go.mod                 # Go module definition and dependencies
 ├── database/
 │   ├── db.go              # Database connection and table creation
-│   └── migrations.go      # Basic SQL migration tool
+│   ├── migrations.go      # Basic SQL migration tool
 ├── models/
 │   └── urls.go            # URL model and database operations
 ├── routes/
 │   ├── routes.go          # Route registration
 │   └── urls.go            # Route handlers (shorten, redirect)
+├── .github/
+│   └── workflows/
+│       └── deploy.yml     # GitHub Actions workflow for CI/CD
 ```
 
 ## SQL Migration Tool
@@ -49,6 +53,25 @@ Migrations{
 
 - `ApplyMigration()`: Runs the migration SQL and records it in the database
 - `AddMigrationToDB()`: Adds the migration name to the `schema_migrations` table
+
+## CI/CD Pipeline with GitHub Actions, AWS EC2, and RDS PostgreSQL
+
+This project uses **GitHub Actions** for continuous integration and deployment. The workflow is defined in `.github/workflows/deploy.yml` and provides:
+
+- **Automatic build and deployment** on every push to the `main` branch
+- **Go binary build** for Linux (suitable for EC2 deployment)
+- **Secure upload** of the built binary to an AWS EC2 instance using SSH and SCP
+- **Environment variable management** by creating a `.env` file on the EC2 instance with the PostgreSQL connection string (for AWS RDS)
+- **Graceful restart** of the application on the EC2 instance
+- **Integration with AWS RDS PostgreSQL** for persistent database storage
+
+**Key steps in the workflow:**
+
+- Build the Go binary for Linux
+- Upload the binary to EC2 using `appleboy/scp-action`
+- SSH into EC2, set up environment variables, kill any running instance, and start the new binary with the correct environment
+
+This setup enables seamless, automated deployments to AWS infrastructure whenever you push code to the repository.
 
 ## API Endpoints
 

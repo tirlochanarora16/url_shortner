@@ -58,5 +58,4 @@ jobs:
             # ✅ Start app with .env loaded
             nohup env $(cat /home/ec2-user/.env | xargs) ./main > app.log 2>&1 &
 
-      - name: Print DB Connection String
-        run: echo "${{ secrets.CONNECTION_STRING }}"
+            export CONNECTION_STRING="${{ secrets.CONNECTION_STRING }}"

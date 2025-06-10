@@ -42,7 +42,7 @@ func ConnectToDb() error {
 	err = db.Ping()
 
 	if err != nil {
-		log.Fatal("Failed to open DB connection")
+		log.Fatal("Failed to open DB connection", connStr)
 		return err
 	}
 

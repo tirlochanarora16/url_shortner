@@ -76,3 +76,25 @@ func CheckShortCode(shortCode string) (*Urls, error) {
 
 	return &selectedRow, nil
 }
+
+func (u *Urls) Update() (*Urls, error) {
+	query := `
+		UPDATE urls SET original_url = $1, updated_at = NOW()
+		WHERE short_code = $2
+		RETURNING id, short_code, original_url
+	`
+
+	row, err := database.DB.Query(query, u.OriginalUrl, u.ShortCode)
+
+	if err != nil {
+		return &Urls{}, err
+	}
+
+	defer row.Close()
+
+	if row.Next() {
+		err = row.Scan(&u.ID, &u.ShortCode, &u.OriginalUrl)
+	}
+
+	return u, nil
+}

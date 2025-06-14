@@ -78,3 +78,33 @@ func catchAllRoutes(c *gin.Context) {
 
 	c.Redirect(http.StatusFound, url.OriginalUrl)
 }
+
+func updateOriginalUrl(c *gin.Context) {
+	var body models.NewShortUrlBody
+	c.ShouldBindJSON(&body)
+	shortCode := c.Param("shortcode")
+	url, err := models.CheckShortCode(shortCode)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "Invalid url",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	url.OriginalUrl = body.OriginalUrl
+	res, err := url.Update()
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Something went wrong",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{
+		"res": res,
+	})
+}

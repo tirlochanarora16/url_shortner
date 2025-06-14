@@ -26,6 +26,7 @@ func createShortUrl(c *gin.Context) {
 
 	if err != nil {
 		fmt.Println(err)
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Short URL for this URL already exists"})
 		return
 	}
 
@@ -64,8 +65,8 @@ func createShortUrl(c *gin.Context) {
 }
 
 func catchAllRoutes(c *gin.Context) {
-	shortCode := c.Param("shortCode")
-	url, err := models.CheckShortCode(shortCode[1:])
+	shortCode := c.Param("shortcode")
+	url, err := models.CheckShortCode(shortCode)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{

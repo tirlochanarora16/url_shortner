@@ -35,14 +35,14 @@ func ConnectToDb() error {
 	db, err := sql.Open("postgres", connStr)
 
 	if err != nil {
-		log.Fatal("err connecting db...", err)
+		log.Println("err connecting db...", err)
 		return err
 	}
 
 	err = db.Ping()
 
 	if err != nil {
-		log.Fatal("Failed to open DB connection", connStr)
+		log.Println("Failed to open DB connection", connStr)
 		return err
 	}
 

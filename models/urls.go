@@ -68,7 +68,7 @@ func CheckShortCode(shortCode string) (*Urls, error) {
 	row := database.DB.QueryRow(query, shortCode)
 
 	var selectedRow Urls
-	err := row.Scan(&selectedRow.ID, &selectedRow.ShortCode, &selectedRow.OriginalUrl, &selectedRow.CreatedAt)
+	err := row.Scan(&selectedRow.ID, &selectedRow.ShortCode, &selectedRow.OriginalUrl, &selectedRow.CreatedAt, &selectedRow.UpdatedAt)
 
 	if err != nil {
 		return &Urls{}, err

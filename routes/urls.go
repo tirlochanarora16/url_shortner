@@ -80,8 +80,8 @@ func catchAllRoutes(c *gin.Context) {
 }
 
 func updateOriginalUrl(c *gin.Context) {
-	var body models.NewShortUrlBody
-	c.ShouldBindJSON(&body)
+	var requestBody models.NewShortUrlBody
+	c.ShouldBindJSON(&requestBody)
 	shortCode := c.Param("shortcode")
 	url, err := models.CheckShortCode(shortCode)
 
@@ -93,7 +93,7 @@ func updateOriginalUrl(c *gin.Context) {
 		return
 	}
 
-	url.OriginalUrl = body.OriginalUrl
+	url.OriginalUrl = requestBody.OriginalUrl
 	res, err := url.Update()
 
 	if err != nil {

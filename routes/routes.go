@@ -7,4 +7,5 @@ func RegisterRoutes(server *gin.Engine) {
 	server.POST("/shorten", createShortUrl)
 	server.PUT("/shorten/:shortcode", updateOriginalUrl)
 	server.GET("/:shortcode", catchAllRoutes)
+	server.DELETE("/shorten/:shortcode", deleteUrl)
 }

@@ -2,6 +2,8 @@ package models
 
 import (
 	"database/sql"
+	"errors"
+	"log"
 	"time"
 
 	"github.com/tirlochanarora16/url_shortner/database"
@@ -97,4 +99,28 @@ func (u *Urls) Update() (*Urls, error) {
 	}
 
 	return u, nil
+}
+
+func (u *Urls) Delete() error {
+	query := "DELETE FROM urls WHERE short_code = $1"
+	result, err := database.DB.Exec(query, u.ShortCode)
+
+	if err != nil {
+		log.Println("Error deleting the url")
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+
+	if err != nil {
+		log.Println("could not delete the given row")
+		return err
+	}
+
+	if rowsAffected == 0 {
+		log.Println("cannot find a row with the given short code", u.ShortCode)
+		return errors.New("cannot find a row with the given short code")
+	}
+
+	return nil
 }

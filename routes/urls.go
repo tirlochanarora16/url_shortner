@@ -108,3 +108,27 @@ func updateOriginalUrl(c *gin.Context) {
 		"res": res,
 	})
 }
+
+func deleteUrl(c *gin.Context) {
+	shortCode := c.Param("shortcode")
+	url, err := models.CheckShortCode(shortCode)
+
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": "invalid short url given",
+		})
+		return
+	}
+
+	err = url.Delete()
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+	}
+
+	c.JSON(http.StatusNoContent, gin.H{
+		"message": "deleted successfully",
+	})
+}

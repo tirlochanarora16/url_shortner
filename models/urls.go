@@ -3,7 +3,9 @@ package models
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/tirlochanarora16/url_shortner/database"
@@ -15,6 +17,7 @@ type Urls struct {
 	OriginalUrl string    `json:"original_url"`
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
+	AccessCount int       `json:"access_count"`
 }
 
 type NewShortUrlBody struct {
@@ -70,7 +73,7 @@ func CheckShortCode(shortCode string) (*Urls, error) {
 	row := database.DB.QueryRow(query, shortCode)
 
 	var selectedRow Urls
-	err := row.Scan(&selectedRow.ID, &selectedRow.ShortCode, &selectedRow.OriginalUrl, &selectedRow.CreatedAt, &selectedRow.UpdatedAt)
+	err := row.Scan(&selectedRow.ID, &selectedRow.ShortCode, &selectedRow.OriginalUrl, &selectedRow.CreatedAt, &selectedRow.UpdatedAt, &selectedRow.AccessCount)
 
 	if err != nil {
 		return &Urls{}, err
@@ -79,23 +82,39 @@ func CheckShortCode(shortCode string) (*Urls, error) {
 	return &selectedRow, nil
 }
 
-func (u *Urls) Update() (*Urls, error) {
-	query := `
-		UPDATE urls SET original_url = $1, updated_at = NOW()
-		WHERE short_code = $2
-		RETURNING id, short_code, original_url
-	`
+func (u *Urls) UpdateUrl(fields map[string]interface{}) (*Urls, error) {
+	if len(fields) == 0 {
+		log.Println("No fields provided to update")
+		return &Urls{}, errors.New("No fields provided to update")
+	}
 
-	row, err := database.DB.Query(query, u.OriginalUrl, u.ShortCode)
+	var i int = 1
+	columnInput := ""
+	var values = []any{}
+
+	for key, value := range fields {
+		columnInput += fmt.Sprintf("%s = %s, ", key, fmt.Sprintf("$%d", i))
+		values = append(values, value)
+		i++
+	}
+	values = append(values, u.ID)
+
+	columnInput = strings.TrimSpace(columnInput)
+	columnInput = columnInput[:len(columnInput)-1]
+
+	query := fmt.Sprintf("UPDATE urls SET %s, updated_at = NOW() WHERE id = $%d RETURNING *", columnInput, i)
+
+	row, err := database.DB.Query(query, values...)
 
 	if err != nil {
+		log.Println("Updating urls table failed")
 		return &Urls{}, err
 	}
 
 	defer row.Close()
 
 	if row.Next() {
-		err = row.Scan(&u.ID, &u.ShortCode, &u.OriginalUrl)
+		err = row.Scan(&u.ID, &u.ShortCode, &u.OriginalUrl, &u.CreatedAt, &u.UpdatedAt, &u.AccessCount)
 	}
 
 	return u, nil

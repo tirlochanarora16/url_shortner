@@ -2,6 +2,7 @@ package routes
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -75,6 +76,14 @@ func catchAllRoutes(c *gin.Context) {
 		})
 		return
 	}
+	url.AccessCount++
+	_, err = url.UpdateUrl(map[string]interface{}{
+		"access_count": url.AccessCount,
+	})
+
+	if err != nil {
+		log.Println("Updating access count failed", err.Error())
+	}
 
 	c.Redirect(http.StatusFound, url.OriginalUrl)
 }
@@ -93,8 +102,9 @@ func updateOriginalUrl(c *gin.Context) {
 		return
 	}
 
-	url.OriginalUrl = requestBody.OriginalUrl
-	res, err := url.Update()
+	res, err := url.UpdateUrl(map[string]interface{}{
+		"original_url": requestBody.OriginalUrl,
+	})
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{

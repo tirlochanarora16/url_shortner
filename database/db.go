@@ -78,8 +78,17 @@ func AlterTable(query, msg string) error {
 }
 
 func RunMigrations() {
+	migrationNames := make(map[string]bool)
+
 	for _, migration := range migrations {
 		table, columnName, migrationName := migration.Table, migration.ColumnName, migration.MigrationName
+
+		if migrationNames[migrationName] == true {
+			fmt.Println("Duplicate migration name found, SKIPPING ---", migrationName)
+			continue
+		}
+
+		migrationNames[migrationName] = true
 
 		table = strings.TrimSpace(table)
 		columnName = strings.TrimSpace(columnName)

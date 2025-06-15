@@ -14,6 +14,12 @@ var migrations = []Migrations{
 		Query:         AlterUrlTableUpdateAt,
 		MigrationName: "add_updated_at_1_06_25",
 	},
+	{
+		Table:         "urls",
+		ColumnName:    "access_count",
+		Query:         AlterUrlTableAccessCount,
+		MigrationName: "add_accessCount_15_06_25",
+	},
 }
 
 func (m *Migrations) Check() (bool, error) {

@@ -18,3 +18,5 @@ const CreateSchemaMigrationTable = `
 `
 
 const AlterUrlTableUpdateAt = "ALTER TABLE urls ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT NOW()"
+
+const AlterUrlTableAccessCount = "ALTER TABLE urls ADD COLUMN IF NOT EXISTS access_count INTEGER DEFAULT 0"

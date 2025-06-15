@@ -92,29 +92,57 @@ func (u *Urls) UpdateUrl(fields map[string]interface{}) (*Urls, error) {
 	columnInput := ""
 	var values = []any{}
 
+	skipUpdate := false
+
 	for key, value := range fields {
+		key = strings.TrimSpace(key)
+		if key == "" {
+			if len(fields) == 1 {
+				skipUpdate = true
+				break
+			}
+			continue
+		}
+		switch v := value.(type) {
+		case string:
+			value = strings.TrimSpace(v)
+			if value == "" {
+				if len(fields) == 1 {
+					skipUpdate = true
+					break
+				}
+				continue
+			}
+		}
+
 		columnInput += fmt.Sprintf("%s = %s, ", key, fmt.Sprintf("$%d", i))
 		values = append(values, value)
 		i++
 	}
+
+	if skipUpdate {
+		return &Urls{}, errors.New("column name and value cannot be empty")
+	}
+
 	values = append(values, u.ID)
 
 	columnInput = strings.TrimSpace(columnInput)
-	columnInput = columnInput[:len(columnInput)-1]
+	columnInput = strings.TrimSuffix(strings.TrimSpace(columnInput), ",")
 
 	query := fmt.Sprintf("UPDATE urls SET %s, updated_at = NOW() WHERE id = $%d RETURNING *", columnInput, i)
 
-	row, err := database.DB.Query(query, values...)
+	err := database.DB.QueryRow(query, values...).Scan(
+		&u.ID,
+		&u.ShortCode,
+		&u.OriginalUrl,
+		&u.CreatedAt,
+		&u.UpdatedAt,
+		&u.AccessCount,
+	)
 
 	if err != nil {
 		log.Println("Updating urls table failed")
 		return &Urls{}, err
-	}
-
-	defer row.Close()
-
-	if row.Next() {
-		err = row.Scan(&u.ID, &u.ShortCode, &u.OriginalUrl, &u.CreatedAt, &u.UpdatedAt, &u.AccessCount)
 	}
 
 	return u, nil

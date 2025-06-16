@@ -23,6 +23,16 @@ func createShortUrl(c *gin.Context) {
 		return
 	}
 
+	isValidUrl := models.IsValidUrl(body.OriginalUrl)
+
+	if !isValidUrl {
+		log.Println("Invalid URL provided")
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "the url provided is invalid",
+		})
+		return
+	}
+
 	url, err := models.CheckUrlExists(body.OriginalUrl)
 
 	if err != nil {
@@ -98,6 +108,16 @@ func updateOriginalUrl(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": "Invalid url",
 			"error":   err.Error(),
+		})
+		return
+	}
+
+	isValidUrl := models.IsValidUrl(requestBody.OriginalUrl)
+
+	if !isValidUrl {
+		log.Println("Invalid URL provided")
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "the url provided is invalid",
 		})
 		return
 	}

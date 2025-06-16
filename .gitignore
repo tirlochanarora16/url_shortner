@@ -33,4 +33,5 @@ vendor/
 # development tools
 .air.toml
 tmp/
+localhost.session.sql
 

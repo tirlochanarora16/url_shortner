@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net/url"
 	"strings"
 	"time"
 
@@ -49,6 +50,24 @@ func (u *Urls) Save() (*Urls, error) {
 	return u, nil
 }
 
+func IsValidUrl(urlString string) bool {
+	u, err := url.ParseRequestURI(urlString)
+
+	if err != nil {
+		return false
+	}
+
+	if u.Scheme != "http" && u.Scheme != "https" {
+		return false
+	}
+
+	if u.Host == "" {
+		return false
+	}
+
+	return true
+}
+
 func CheckUrlExists(originalUrl string) (*Urls, error) {
 	query := "SELECT *  FROM urls WHERE original_url = $1"
 
@@ -82,7 +101,7 @@ func CheckShortCode(shortCode string) (*Urls, error) {
 	return &selectedRow, nil
 }
 
-func (u *Urls) UpdateUrl(fields map[string]interface{}) (*Urls, error) {
+func (u *Urls) UpdateUrl(fields map[string]any) (*Urls, error) {
 	if len(fields) == 0 {
 		log.Println("No fields provided to update")
 		return &Urls{}, errors.New("No fields provided to update")
@@ -124,7 +143,7 @@ func (u *Urls) UpdateUrl(fields map[string]interface{}) (*Urls, error) {
 		return &Urls{}, errors.New("column name and value cannot be empty")
 	}
 
-	values = append(values, u.ID)
+	values = append(values, u.ID) // thereby last "i" value would be the ID of the url for matching
 
 	columnInput = strings.TrimSpace(columnInput)
 	columnInput = strings.TrimSuffix(strings.TrimSpace(columnInput), ",")

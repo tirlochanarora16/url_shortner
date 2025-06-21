@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"github.com/tirlochanarora16/url_shortner/database"
+	"github.com/tirlochanarora16/url_shortner/pkg"
 	"github.com/tirlochanarora16/url_shortner/routes"
 )
 
@@ -21,6 +22,13 @@ func main() {
 
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	err = pkg.InitRedis()
+
+	if err != nil {
+		log.Println("Error connecting to the redis DB", err)
+		return
 	}
 
 	database.CreateTable(database.CreateUrlTable, "users")

@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/teris-io/shortid"
 	"github.com/tirlochanarora16/url_shortner/models"
+	"github.com/tirlochanarora16/url_shortner/pkg"
 )
 
 func createShortUrl(c *gin.Context) {
@@ -86,14 +87,15 @@ func catchAllRoutes(c *gin.Context) {
 		})
 		return
 	}
-	url.AccessCount++
-	_, err = url.UpdateUrl(map[string]interface{}{
-		"access_count": url.AccessCount,
-	})
 
-	if err != nil {
-		log.Println("Updating access count failed", err.Error())
-	}
+	go func() {
+		key := fmt.Sprintf("url_hits:%s", shortCode)
+		err := pkg.Rdb.Incr(pkg.Ctx, key).Err()
+
+		if err != nil {
+			log.Printf("Redis increment failed for %s: %v", shortCode, err)
+		}
+	}()
 
 	c.Redirect(http.StatusFound, url.OriginalUrl)
 }

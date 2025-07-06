@@ -7,6 +7,8 @@ A simple URL shortener service built with Go, Gin, and PostgreSQL. This service 
 - Generate a unique short URL for any valid original URL
 - Store and retrieve URL mappings in a PostgreSQL database
 - Redirect short URLs to their original URLs
+- **Redis-based access counting** for high-performance hit tracking
+- **Bulk database updates** via Python cron job for efficient data persistence
 - RESTful API endpoints
 - **Basic SQL migration tool for schema changes**
 - **Automated CI/CD pipeline with GitHub Actions, AWS EC2, and RDS PostgreSQL**
@@ -25,6 +27,10 @@ url_shortner/
 ├── routes/
 │   ├── routes.go          # Route registration
 │   └── urls.go            # Route handlers (shorten, redirect)
+├── pkg/
+│   └── redisClient.go     # Redis client configuration
+├── scripts/
+│   └── redis_sync.py      # Python cron job for bulk Redis to DB sync
 ├── .github/
 │   └── workflows/
 │       └── deploy.yml     # GitHub Actions workflow for CI/CD
@@ -73,6 +79,62 @@ This project uses **GitHub Actions** for continuous integration and deployment. 
 
 This setup enables seamless, automated deployments to AWS infrastructure whenever you push code to the repository.
 
+## Redis-Based Access Counting
+
+This project implements a **high-performance access counting system** using Redis for real-time hit tracking and a Python cron job for bulk database updates.
+
+### How It Works
+
+1. **Real-time Hit Tracking**: When a short URL is accessed, the system immediately increments a Redis counter using the key pattern `url_hits:{shortCode}`. This provides instant response times without database writes.
+
+2. **Bulk Database Updates**: A Python cron job (`scripts/redis_sync.py`) runs periodically to:
+   - Read all hit counters from Redis
+   - Perform bulk updates to the PostgreSQL database
+   - Clear processed counters from Redis
+
+### Benefits
+
+- **High Performance**: Redis operations are extremely fast, ensuring minimal latency during URL redirects
+- **Scalability**: Can handle thousands of concurrent requests without database bottlenecks
+- **Data Consistency**: Periodic bulk updates ensure data persistence while maintaining performance
+- **Fault Tolerance**: Redis provides persistence and replication options for reliability
+
+### Setup Redis
+
+1. **Install Redis** (if not already installed):
+   ```sh
+   # macOS
+   brew install redis
+   
+   # Ubuntu/Debian
+   sudo apt-get install redis-server
+   ```
+
+2. **Start Redis**:
+   ```sh
+   redis-server
+   ```
+
+3. **Configure Redis connection** in your environment:
+   ```env
+   REDIS_URL=redis://localhost:6379
+   ```
+
+### Python Cron Job Setup
+
+1. **Install Python dependencies**:
+   ```sh
+   pip install redis psycopg2-binary
+   ```
+
+2. **Set up the cron job** to run the sync script periodically:
+   ```sh
+   # Add to crontab (runs every 5 minutes)
+   */5 * * * * /usr/bin/python3 /path/to/url_shortner/scripts/redis_sync.py
+   ```
+
+3. **Configure the sync script** with your database and Redis connection details.
+
 ## API Endpoints
 
 ### Create Short URL
@@ -94,9 +156,10 @@ This setup enables seamless, automated deployments to AWS infrastructure wheneve
    cd url_shortner
    ```
 2. **Set up environment variables:**
-   - Create a `.env` file with your PostgreSQL connection string:
+   - Create a `.env` file with your PostgreSQL connection string and Redis URL:
      ```env
      CONNECTION_STRING=postgres://user:password@localhost:5432/dbname?sslmode=disable
+     REDIS_URL=redis://localhost:6379
      ```
 3. **Install dependencies:**
    ```sh
@@ -112,8 +175,14 @@ This setup enables seamless, automated deployments to AWS infrastructure wheneve
 
 - [Gin](https://github.com/gin-gonic/gin) - HTTP web framework
 - [PostgreSQL](https://www.postgresql.org/) - Database
+- [Redis](https://redis.io/) - In-memory data store for access counting
 - [shortid](https://github.com/teris-io/shortid) - Short ID generator
 - [godotenv](https://github.com/joho/godotenv) - Environment variable loader
+
+### Python Dependencies (for cron job)
+
+- `redis` - Redis client for Python
+- `psycopg2-binary` - PostgreSQL adapter for Python
 
 ## License
 

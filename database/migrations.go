@@ -20,6 +20,12 @@ var migrations = []Migrations{
 		Query:         AlterUrlTableAccessCount,
 		MigrationName: "add_accessCount_15_06_25",
 	},
+	{
+		Table:         "urls",
+		ColumnName:    "short_code",
+		Query:         ShortCodeUniqueConstraint,
+		MigrationName: "short_code_constraint_06_07_25",
+	},
 }
 
 func (m *Migrations) Check() (bool, error) {

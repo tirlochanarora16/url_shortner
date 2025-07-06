@@ -80,7 +80,7 @@ func AlterTable(query, msg string) error {
 func RunMigrations() {
 	migrationNames := make(map[string]bool)
 
-	for _, migration := range migrations {
+	for _, migration := range MigrationsList {
 		table, columnName, migrationName := migration.Table, migration.ColumnName, migration.MigrationName
 
 		if migrationNames[migrationName] == true {
